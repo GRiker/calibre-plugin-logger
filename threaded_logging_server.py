@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
+# This code is launched from a terminal window, e.g.
+# python threaded_logging_server.py
 
+__license__ = 'GPL v3'
+__copyright__ = '2014, Gregory Riker'
 
 import logging, os, re, socket, sqlite3, time, threading, SocketServer
 

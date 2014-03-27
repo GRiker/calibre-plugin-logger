@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
+
+__license__ = 'GPL v3'
+__copyright__ = '2014, Gregory Riker'
+
+
 # This code needs to be run within the context of a plugin, or calibre-debug
 
 import mechanize, time
@@ -7,7 +12,7 @@ from threading import Thread
 from calibre import browser
 from calibre.constants import (__appname__, __version__, iswindows, isosx,
         isportable, is64bit)
-from calibre.utils.config import prefs        
+from calibre.utils.config import prefs
 
 class PhoneHome(Thread):
     '''
@@ -15,7 +20,7 @@ class PhoneHome(Thread):
     '''
     #URL = "http://192.168.1.105:7584"
     URL = "http://calibre-plugins.dnsd.info:7584"
-    
+
     WAIT_FOR_RESPONSE = True
     def __init__(self, plugin=None, version="0"):
         Thread.__init__(self)
@@ -34,21 +39,21 @@ class PhoneHome(Thread):
         self.req.add_header('CALIBRE_PLUGIN', self.plugin)
         self.req.add_header('PLUGIN_VERSION', self.plugin_version)
         #print self.req.header_items()
-        
-        
+
+
     def run(self):
         br = browser()
         try:
             if self.WAIT_FOR_RESPONSE:
-                ans = br.open(self.req).read().strip()            
+                ans = br.open(self.req).read().strip()
                 print ans
             else:
                 br.open_novisit(self.req)
-                
+
         except Exception as e:
             import traceback
             print traceback.format_exc()
-                      
+
 def main():
     #URL = "http://192.168.1.105:7584"
     URL = "http://casaalegria.homeip.net:7584"
@@ -71,17 +76,17 @@ def main():
             post.req.add_header('PLUGIN_BOOK_COUNT', '50')
             post.req.add_header('PLUGIN_SOME_OTHER_VALUE', 'abcde')
             post.start()
-        
+
         # Post a request to an new plugin
         PhoneHome(plugin='Marvin XD', version=1.23).start()
 
         # Post a request to an new plugin
         PhoneHome(plugin='iOS reader applications', version=1.23).start()
-        
+
     except:
         print "Unable to reach server"
         import traceback
         print traceback.format_exc()
 
-if __name__ == '__main__':   
+if __name__ == '__main__':
     main()

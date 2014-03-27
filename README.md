@@ -1,4 +1,4 @@
-calibre-plugin-logger
+Calibre plugin logger
 =====================
 
-Python server to log metrics posted from calibre plugins
+A python server that logs metrics posted from calibre plugins.
