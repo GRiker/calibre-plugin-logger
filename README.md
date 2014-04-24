@@ -11,3 +11,7 @@ To experiment on a development machine, open a terminal window and execute
 
 Open another terminal window, execute
 ```calibre-debug client.py```
+
+To terminate the server, send a SIGTERM signal to the server PID:
+```ps -A | grep server.py```
+```kill -TERM <PID>``` where ```<PID>``` is the PID of the ```python server.py``` process

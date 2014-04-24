@@ -6,7 +6,8 @@
 __license__ = 'GPL v3'
 __copyright__ = '2014, Gregory Riker'
 
-import argparse, hashlib, json, logging, os, re, socket, sqlite3, time, threading, urllib, SocketServer
+import argparse, hashlib, json, logging, os, re, signal, socket, sqlite3
+import time, threading, urllib, SocketServer
 
 # Version for newly minted DBs
 CURRENT_DB_VERSION = 1
@@ -119,7 +120,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         '''
         cur_thread = threading.current_thread()
         self.data = self.request.recv(1024)
-#         self.initialize_event(self.client_address[0])
         self.parse_header()
         plugin = self.event.get('calibre_plugin')
 
@@ -129,7 +129,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
         if plugin is not None:
             if self.plugin_db_registered(plugin):
-#                 self.validate_plugin_fields()
                 if self.store_event():
                     self.request.sendall("event logged to '{0}'".format(plugin))
                 else:
@@ -422,12 +421,27 @@ class PluginEventLogger(object):
             SchemaUpgrade(conn, row[b'plugin_name'], self.log)
 
     def launch_server(self):
-        server = ThreadedTCPServer((self.HOST, self.PORT), self.handler_factory())
+        self.doneEvent = threading.Event()
+        signal.signal(signal.SIGTERM, self.terminate)
+
+        self.server = ThreadedTCPServer((self.HOST, self.PORT), self.handler_factory())
         if DEVELOPMENT:
             self.log.info("launching plugin logging server listening on {0}:{1}".format(self.HOST, self.PORT))
         else:
             self.log.info("launching plugin logging server listening on port {1}".format(self.PORT))
-        server.serve_forever()
+        self.server.serve_forever()
+
+        self.doneEvent.wait()
+
+    def shutdownHandler(self, msg, event):
+        self.server.shutdown()
+        self.log.info("shutdown complete")
+        event.set()
+
+    def terminate(self, signal, frame):
+        self.log.info("SIGTERM received, shutting down…")
+        t = threading.Thread(target = self.shutdownHandler, args = ('SIGTERM received', self.doneEvent))
+        t.start()
 
 
 def main():
